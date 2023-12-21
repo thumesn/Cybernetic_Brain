@@ -194,7 +194,7 @@ class MyModel_dann(nn.Module):
         feature = self.feature(input_data)
         feature = feature.view(-1, 50 * 4 * 4)
         reverse_feature = ReverseLayerF.apply(feature, alpha)
-        class_output = self.class_classifier(feature)
-        domain_output = self.domain_classifier(reverse_feature)
+        output_cls = self.class_classifier(feature)
+        output_dom = self.domain_classifier(reverse_feature)
 
-        return class_output, domain_output
+        return output_cls, output_dom

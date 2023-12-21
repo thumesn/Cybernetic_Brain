@@ -60,7 +60,7 @@ for epoch in range(num_epochs):
         best_acc = accuracy
         torch.save(model.state_dict(), "./save/cnn/mymodel_baseline.pt")
 
-
+print(f"Best Accuracy: {best_acc}")
 
 
 
