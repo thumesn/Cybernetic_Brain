@@ -15,15 +15,20 @@ import numpy as np
 
 # 对数据集的分布进行调整
 class ColoredMNIST_adjusted(datasets.VisionDataset):    
-    def __init__(self, name):
+    def __init__(self, name, balance=True):
         self.data_label = torch.load(f'./ColoredMNIST/{name}.pt')
         self.transform = transforms.ToTensor()
-        self.split_data()
-        self.prepare_data(self.imgs_red)
-        self.prepare_data(self.imgs_green)
-        self.data_red = [(self.transform(img) * 255, target) for (img, target) in self.imgs_red]
-        self.data_green = [(self.transform(img) * 255, target) for (img, target) in self.imgs_green]
-        self.data = self.data_red + self.data_green
+        assert balance in [True, False]
+        if balance:
+            self.split_data()
+            self.prepare_data(self.imgs_red)
+            self.prepare_data(self.imgs_green)
+            self.data_red = [(self.transform(img) * 255, target) for (img, target) in self.imgs_red]
+            self.data_green = [(self.transform(img) * 255, target) for (img, target) in self.imgs_green]
+            self.data = self.data_red + self.data_green
+            # import pdb; pdb.set_trace()
+        else:
+            self.data = [(self.transform(img) * 255, target) for (img, target) in self.data_label]
     
     def split_data(self):
         self.imgs_red = [(img, target) for (img, target) in self.data_label if detect_color(img) == 1]
@@ -179,8 +184,6 @@ class ColoredMNIST_bjz(datasets.VisionDataset):
                             self.cnt[binary_label_true][color] += 1
                             if self.cnt[i][0] == self.cnt[i][1]:
                                 break
-
-
         
     def __getitem__(self, index):
         img, target = self.data_label[index]
@@ -190,9 +193,6 @@ class ColoredMNIST_bjz(datasets.VisionDataset):
     def __len__(self):
         return len(self.data_label)
 
-
-
-  
     
 class ColoredMNIST(datasets.VisionDataset):
     def __init__(self, name):

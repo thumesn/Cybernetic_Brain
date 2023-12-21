@@ -25,8 +25,6 @@ test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 print(len(train_loader))
 print(len(test_loader))
 
-# import pdb; pdb.set_trace()
-
 best_acc = 0
 
 # 训练模型

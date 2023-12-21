@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from torchvision import transforms
 from torch.utils.data import DataLoader
 from utils.dataset import ColoredMNIST_adjusted as ColoredMNIST
 
@@ -17,7 +18,7 @@ optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
 # 加载数据集
 train_dataset = ColoredMNIST(name='train1')
-test_dataset = ColoredMNIST(name='test')
+test_dataset = ColoredMNIST(name='test', balance=False)
 
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)

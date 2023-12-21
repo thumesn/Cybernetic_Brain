@@ -1,5 +1,5 @@
 from utils.model import MyModel
-from utils.utils import set_all_seeds
+from utils.utils import set_all_seeds, detect_color, reverse_batch
 import torch 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -30,10 +30,14 @@ for epoch in range(num_epochs):
 
     for images, labels in train_loader:
         images = images.to('cuda')
+        images_reverse = reverse_batch(images).to('cuda')
         labels = labels.to('cuda')
         optimizer.zero_grad()
         outputs = model(images)
+        outputs_reverse = model(images_reverse)
         loss = criterion(outputs, labels)
+        loss_reverse = criterion(outputs_reverse, labels)
+        loss = (loss + loss_reverse) / 2
         loss.backward()
         optimizer.step()
         
@@ -47,7 +51,6 @@ for epoch in range(num_epochs):
             images = images.to('cuda')
             labels = labels.to('cuda')
             outputs = model(images)
-            # import pdb; pdb.set_trace()
             acc = torch.sum(outputs.argmax(dim=1)==labels).detach().cpu().numpy()
             correct+=acc
             total += labels.size(0)
