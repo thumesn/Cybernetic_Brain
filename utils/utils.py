@@ -26,20 +26,6 @@ def detect_color(image):
     else:
         raise AssertionError("图像中没有检测到绿色或红色像素")
     
-# def reverse_batch(images):
-#     reverse = []
-#     for img in images:
-#         img = img.permute(1, 2, 0).detach().cpu().numpy()
-#         red_channel = img[:, :, 0]
-#         green_channel = img[:, :, 1]
-#         img[:, :, 0] = green_channel
-#         img[:, :, 1] = red_channel
-#         img = np.transpose(img, (2, 0, 1))
-#         img = torch.tensor(img)
-#         reverse.append(img)
-#     reverse = torch.stack(reverse)
-#     return reverse
-
 def reverse_batch(images):
     reverse_images = images.clone()
     reverse_images[:, 0, ...], reverse_images[:, 1, ...] = images[:, 1, ...], images[:, 0, ...]

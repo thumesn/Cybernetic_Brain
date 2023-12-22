@@ -1,4 +1,4 @@
-from utils.model import MyModel
+from utils.model import MyModel, SNNModel
 from utils.utils import set_all_seeds, detect_color, reverse_batch
 import torch 
 import torch.nn as nn
@@ -9,7 +9,7 @@ from utils.dataset import ColoredMNIST
 
 # 初始化模型
 set_all_seeds(0)
-model = MyModel()
+model = SNNModel()
 model.to('cuda')
 # 定义损失函数和优化器
 criterion = nn.CrossEntropyLoss()
@@ -61,7 +61,7 @@ for epoch in range(num_epochs):
     
     if accuracy > best_acc:
         best_acc = accuracy
-        torch.save(model.state_dict(), "./save/cnn/mymodel_biloss.pt")
+        torch.save(model.state_dict(), "./save/snn/mymodel_biloss.pt")
 
 print(f"Best Accuracy: {best_acc}")
 
