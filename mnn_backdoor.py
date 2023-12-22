@@ -7,7 +7,7 @@ from utils.model import MyModel
 import torch
 from tqdm import tqdm
 from torch.utils.data import DataLoader
-from utils.dataset import ColoredMNIST_adjusted as ColoredMNIST
+from utils.dataset import ColoredMNIST
 
 
 model = MyModel()

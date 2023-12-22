@@ -23,12 +23,12 @@ class ColoredMNIST_adjusted(datasets.VisionDataset):
             self.split_data()
             self.prepare_data(self.imgs_red)
             self.prepare_data(self.imgs_green)
-            self.data_red = [(self.transform(img) * 255, target) for (img, target) in self.imgs_red]
-            self.data_green = [(self.transform(img) * 255, target) for (img, target) in self.imgs_green]
+            self.data_red = [(self.transform(img), target) for (img, target) in self.imgs_red]
+            self.data_green = [(self.transform(img), target) for (img, target) in self.imgs_green]
             self.data = self.data_red + self.data_green
             # import pdb; pdb.set_trace()
         else:
-            self.data = [(self.transform(img) * 255, target) for (img, target) in self.data_label]
+            self.data = [(self.transform(img) , target) for (img, target) in self.data_label]
     
     def split_data(self):
         self.imgs_red = [(img, target) for (img, target) in self.data_label if detect_color(img) == 1]

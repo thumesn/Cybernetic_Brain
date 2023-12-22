@@ -30,7 +30,7 @@ def divide_dataset(dataset):
     return grouped_dataset
     
 train_dataset = ColoredMNIST(name='train1')
-test_dataset = ColoredMNIST(name='test')
+test_dataset = ColoredMNIST(name='test', balance=False)
 train_dataset_grouped = divide_dataset(train_dataset)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 

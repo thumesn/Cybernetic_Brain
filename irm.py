@@ -21,7 +21,7 @@ def train_test_MyModel_irm():
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     train_dataset_1 = ColoredMNIST(name='train1')
     train_dataset_2 = ColoredMNIST(name='train2')
-    test_dataset = ColoredMNIST(name='test')
+    test_dataset = ColoredMNIST(name='test', balance=False)
     train_loader_1 = DataLoader(train_dataset_1, batch_size=64, shuffle=True)
     train_loader_2 = DataLoader(train_dataset_2, batch_size=64, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)

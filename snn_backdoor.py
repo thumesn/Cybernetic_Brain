@@ -17,7 +17,7 @@ optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
 # 加载数据集
 train_dataset = ColoredMNIST(name='train1')
-test_dataset = ColoredMNIST(name='test')
+test_dataset = ColoredMNIST(name='test', balance=False)
 
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
@@ -63,3 +63,4 @@ for epoch in range(num_epochs):
         best_acc = accuracy
         torch.save(model.state_dict(), "./save/snn/mymodel_backdoor.pt")
 
+print(f"Best Accuracy: {best_acc}")
