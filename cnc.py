@@ -12,22 +12,23 @@ from utils.model import MyModel_cnc as MyModel
 from utils.dataset import ColoredMNIST_cnc as ColoredMNIST
 from utils.dataset import ContrastiveDataset
 from utils.utils import set_all_seeds
+from utils.eval import eval
 
-
-device=torch.device("cuda:1")
+device=torch.device("cuda:0")
 
 model_erm = MyModel(device=device)
 
 optimizer_erm = torch.optim.Adam(model_erm.parameters(), lr=1e-4)
 criterion=nn.CrossEntropyLoss()
 
-trainDataset = ColoredMNIST( merge_col= False, transform=None)
-testDataset = ColoredMNIST( env='test', merge_col=False, transform=None)
+trainDataset = ColoredMNIST()
+testDataset = ColoredMNIST( env='test')
 train_loader = DataLoader(trainDataset, batch_size=64, shuffle=True)
 test_loader = DataLoader(testDataset, batch_size=64, shuffle=False)
+
 for epoch in range(20):
     loop = tqdm(enumerate(train_loader), total=len(train_loader))
-    for index, (img, target, col) in loop:
+    for index, (img, target) in loop:
         
         img, target  = img.to(device), target.to(device) 
         pred, target = model_erm(img, target)
@@ -55,7 +56,7 @@ losses_cnc = {
     'lambda': 0.5
     } 
 
-model = CorrectNContrast(input_channel=3, device=device)
+model = CorrectNContrast(device=device)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 cncDataset = ContrastiveDataset(trainDataset, model_erm, device)
 cncLoader = DataLoader(cncDataset, batch_size=16, shuffle=True)
