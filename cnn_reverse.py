@@ -37,7 +37,7 @@ for epoch in range(num_epochs):
         outputs_reverse = model(images_reverse)
         loss = criterion(outputs, labels)
         loss_reverse = criterion(outputs_reverse, labels)
-        loss = (loss + loss_reverse) / 2
+        loss = (loss + loss_reverse) / 2 # loss加权
         loss.backward()
         optimizer.step()
         
@@ -61,7 +61,7 @@ for epoch in range(num_epochs):
     
     if accuracy > best_acc:
         best_acc = accuracy
-        torch.save(model.state_dict(), "./save/cnn/mymodel_baseline.pt")
+        torch.save(model.state_dict(), "./save/cnn/mymodel_biloss.pt")
 
 print(f"Best Accuracy: {best_acc}")
 

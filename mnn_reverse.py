@@ -11,7 +11,7 @@ from utils.dataset import ColoredMNIST_adjusted as ColoredMNIST
 
 
 model = MyModel()
-ckpt = torch.load(f"./save/cnn/mymodel_backdoor.pt", map_location='cpu')
+ckpt = torch.load(f"./save/cnn/mymodel_biloss.pt", map_location='cpu')
 model.load_state_dict(ckpt)
 
 reference_memristor = memtorch.bh.memristor.VTEAM
