@@ -108,9 +108,9 @@ class MyModel_irm(nn.Module):
         x = x.flatten()
         return x
     
-    
+
 class CorrectNContrast(nn.Module):
-    def __init__(self, input_channel=1, output_channel=2, device='cuda'):
+    def __init__(self,device='cuda'):
         super(CorrectNContrast, self).__init__()
         self.device = device
         self.net = MyModel().to(device)
@@ -198,3 +198,59 @@ class MyModel_dann(nn.Module):
         output_dom = self.domain_classifier(reverse_feature)
 
         return output_cls, output_dom
+class LeNet_pred(nn.Module):
+    def __init__(self, input_channel=1, output_channel=2):
+        super(LeNet_pred, self).__init__()
+
+        self.extract = nn.Sequential(
+            nn.Conv2d(input_channel, 6, kernel_size=5, padding=2), nn.ReLU(),
+            nn.AvgPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(6, 16, kernel_size=5), nn.ReLU(),
+            nn.AvgPool2d(kernel_size=2, stride=2),
+            nn.Flatten(),
+            nn.Linear(16 * 5 * 5, 120), nn.ReLU(),
+            nn.Linear(120, 84), nn.ReLU(),
+        )
+        self.final = nn.Linear(84, output_channel)
+
+    def forward(self, x):
+        feat = self.extract(x)
+        pred = self.final(feat)
+        return pred, feat
+
+    def feat(self, x):
+        return self.extract(x)
+
+    def pred(self, x):
+        x = self.extract(x)
+        return self.final(x)
+class LeNet(nn.Module):
+    def __init__(self, input_channel=1, output_channel=2):
+        super(LeNet, self).__init__()
+
+        self.net = nn.Sequential(
+            nn.Conv2d(input_channel, 6, kernel_size=5, padding=2), nn.ReLU(),
+            nn.AvgPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(6, 16, kernel_size=5), nn.ReLU(),
+            nn.AvgPool2d(kernel_size=2, stride=2),
+            nn.Flatten(),
+            nn.Linear(16 * 5 * 5, 120), nn.ReLU(),
+            nn.Linear(120, 84), nn.ReLU(),
+            nn.Linear(84, output_channel)
+        )
+
+    def forward(self, x):
+        return self.net(x)
+
+
+class MyModel_cnc(nn.Module):
+    def __init__(self, device = 'cuda'):
+        super(MyModel, self).__init__()
+        self.device = device
+        self.net = LeNet(3, 2).to(device) 
+
+    def forward(self, x,  target ):
+        return self.net(x), target
+        
+    def eval(self, x ):
+        return self.net(x)

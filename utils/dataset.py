@@ -5,13 +5,14 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader,Dataset
 from torchvision import transforms
 from torchvision.datasets import MNIST
 from torchvision import datasets
 from torch.utils.data import random_split
 from utils.utils import detect_color
 import numpy as np
+import os 
 
 # 对数据集的分布进行调整
 class ColoredMNIST_adjusted(datasets.VisionDataset):    
@@ -225,8 +226,100 @@ class RedMNIST(datasets.VisionDataset):
         return img, target
     def __len__(self):
         return len(self.data_label)
-    
-    
+class ColoredMNIST_cnc(datasets.VisionDataset):
+    def __init__(self, root='', env='train1', transform=None, target_transform=None, merge_col = False):
+        super(ColoredMNIST, self).__init__(root, transform=transform,
+                                           target_transform=target_transform)
+
+        if env in ['train1', 'train2', 'test']:
+            data_label_tuples = torch.load(os.path.join(self.root, 'ColoredMNIST', env) + '.pt')
+        elif env == 'all_train':
+            data_label_tuples = torch.load(os.path.join(self.root, 'ColoredMNIST', 'train1.pt')) + \
+                                     torch.load(os.path.join(self.root, 'ColoredMNIST', 'train2.pt'))
+        else:
+            raise RuntimeError(f'{env} env unknown. Valid envs are train1, train2, test, and all_train')
+        self.num = [0,0]
+        self.col_label = np.zeros((2,2))
+        self.data_label_color_tuples = []
+        for img, target in data_label_tuples:
+            img = transforms.ToTensor()(img)
+            col = (torch.sum(img[0])==0)
+            self.num[col] += 1
+            self.col_label[col][target] += 1
+            if merge_col:
+                img = img.sum(dim=0).unsqueeze(dim=0)
+            self.data_label_color_tuples.append(tuple([img, target, col]))
+        self.transform = transform
+        self.target_transform = target_transform
+
+    def __getitem__(self, index):
+        """
+    Args:
+        index (int): Index
+
+    Returns:
+        tuple: (image, target) where target is index of the target class.
+    """
+        img, target, col = self.data_label_color_tuples[index]
+        # img = transforms.ToTensor()(img)
+        if self.transform is not None:
+            img = self.transform(img)
+
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+
+        return img, target, col
+
+    def __len__(self):
+        return len(self.data_label_color_tuples)   
+class ContrastiveDataset(Dataset):
+    def __init__(self, data, model, device):
+        super(ContrastiveDataset, self).__init__()
+        self.data = data
+        self.groups = [[], [], [], []]  # 0 for true negative, 1 for false negative, 2 for false positive, 3 for true positive
+
+        bs = 64
+        loader = DataLoader(data, batch_size = bs, shuffle = False)
+        for i, (img, target, col) in enumerate(loader):
+            ids = range(i * bs, min(i * bs + bs, len(data)))
+            with torch.no_grad():
+                img, target, col = img.to(device), target.to(device), col.to(device)
+                pred, _ = model(img, target )
+                pred = torch.argmax(pred, dim=1)
+                for idx, p, t in zip(ids, pred, target):
+                    self.groups[p * 2 + t].append(idx)
+
+        self.group_len = [len(self.groups[i]) for i in range(4)]
+        self.output_size = 4
+
+    def __len__(self):
+        return self.group_len[0] + self.group_len[3] - 2 * self.output_size + 2
+
+    def __getitem__(self, idx):
+        if idx < self.group_len[0] - self.output_size + 1:
+            group = 0
+            group_positive = 2
+            group_negative = 1
+            positive = 0
+        else:
+            idx = idx - self.group_len[0] + self.output_size - 1
+            group = 3
+            group_positive = 1
+            group_negative = 2
+            positive = 1
+
+        anchors, positives, negatives = [], [], []
+        for i in range(idx, idx + 4):
+            # get points just use the image
+            anchors.append(self.data[self.groups[group][i % self.group_len[group]]][0])
+            positives.append(self.data[self.groups[group_positive][i % self.group_len[group_positive]]][0])
+            negatives.append(self.data[self.groups[group_negative][i % self.group_len[group_negative]]][0])
+
+        target_anchors = torch.tensor([positive] * 4)
+        target_positives = torch.tensor([positive] * 4)
+        target_negatives = torch.tensor([1 - positive] * 4)
+
+        return torch.stack(anchors), torch.stack(positives), torch.stack(negatives), target_anchors, target_positives, target_negatives   
 # 仅加载绿色图片    
 class GreenMNIST(datasets.VisionDataset):
     def __init__(self, name):
