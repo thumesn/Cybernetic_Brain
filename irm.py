@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from utils.dataset import ColoredMNIST_adjusted as ColoredMNIST
+from utils.dataset import ColoredMNIST
 from tqdm import tqdm
 import numpy as np
 import random
@@ -21,11 +21,11 @@ def train_test_MyModel_irm():
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     train_dataset_1 = ColoredMNIST(name='train1')
     train_dataset_2 = ColoredMNIST(name='train2')
-    test_dataset = ColoredMNIST(name='test', balance=False)
+    test_dataset = ColoredMNIST(name='test')
     train_loader_1 = DataLoader(train_dataset_1, batch_size=64, shuffle=True)
     train_loader_2 = DataLoader(train_dataset_2, batch_size=64, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
-    num_epochs = 10
+    num_epochs = 50
     best_acc = 0.0
 
     for epoch in range(num_epochs):
