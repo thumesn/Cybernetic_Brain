@@ -1,18 +1,18 @@
 ## 基础部分
 
-运行bi-loss方法的训练，xxx为模型（CNN，SNN，MNN）
+运行bi-loss方法的训练，xxx为模型（cnn，snn，mnn）
 
 ```bash
 python xxx_reverse.py 
 ```
 
-运行bi-model方法的训练，xxx为模型（CNN，SNN，MNN）
+运行bi-model方法的训练，xxx为模型（cnn，snn，mnn）
 
 ```bash
 python xxx_bimodel.py 
 ```
 
-运行数据集后门调整方法的训练，xxx为模型（CNN，SNN，MNN）
+运行数据集后门调整方法的训练，xxx为模型（cnn，snn，mnn）
 
 ```bash
 python xxx_backdoor.py 
