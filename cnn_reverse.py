@@ -24,7 +24,7 @@ test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 best_acc = 0
 
 # 训练模型
-num_epochs = 50
+num_epochs = 10
 for epoch in range(num_epochs):
     model.train()
 

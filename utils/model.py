@@ -3,7 +3,7 @@ import torch
 from snntorch import surrogate
 from snntorch import functional as SF
 from snntorch import spikeplot as splt
-from snntorch import utils
+from snntorch.utils import reset
 import snntorch as snn
 from torch.autograd import Function
 
@@ -30,33 +30,30 @@ class MyModel(nn.Module):
         x = self.fc2(x)
         return x
     
-class SNNModel(nn.Module):
+class MySNNModel(nn.Module):
     def __init__(self):
-        super(SNNModel, self).__init__()
-        spike_grad = surrogate.fast_sigmoid()
-        beta = 0.5
-        self.snn = nn.Sequential(nn.Conv2d(3, 12, 5),
+        super(MySNNModel, self).__init__()
+        self.beta = 0.5
+        self.spike_grad = surrogate.fast_sigmoid()
+        self.feature = nn.Sequential(nn.Conv2d(3, 12, 5),
             nn.MaxPool2d(2),
-            snn.Leaky(beta=beta, spike_grad=spike_grad, init_hidden=True),
+            snn.Leaky(beta=self.beta, spike_grad=self.spike_grad, init_hidden=True),
             nn.Conv2d(12, 32, 5),
             nn.MaxPool2d(2),
-            snn.Leaky(beta=beta, spike_grad=spike_grad, init_hidden=True),
+            snn.Leaky(beta=self.beta, spike_grad=self.spike_grad, init_hidden=True),
             nn.Flatten(),
             ) 
         self.fc = nn.Sequential(
-                    nn.Linear(512, 100),
-                    nn.Linear(100, 2),
-                    # 经测试，最后一层的leaky层去掉会使得性能更好；
-                    # snn.Leaky(beta=beta, spike_grad=spike_grad, init_hidden=True, output=True)
-                    )
+                nn.Linear(512, 100),
+                nn.Linear(100, 2),)
 
     def forward(self, x):
-        utils.reset(self.snn)
-        utils.reset(self.fc)
-        x = self.snn(x)
-        x = x.view(x.size(0), -1)
-        y = self.fc(x)
-        return y
+        reset(self.feature)
+        reset(self.fc)
+        x = self.feature(x)
+        x = x.flatten(start_dim = 1)
+        x = self.fc(x)
+        return x
     
     
 class MyModel_dro(nn.Module):
@@ -109,34 +106,6 @@ class MyModel_irm(nn.Module):
         return x
     
     
-class CorrectNContrast(nn.Module):
-    def __init__(self, input_channel=1, output_channel=2, device='cuda'):
-        super(CorrectNContrast, self).__init__()
-        self.device = device
-        self.net = MyModel().to(device)
-
-    def forward(self, anchors, positives, negatives, target_anchors, target_positives, target_negatives):
-        anchors_flat = anchors.view(-1, *anchors.shape[-3:])
-        positives_flat = positives.view(-1, *positives.shape[-3:])
-        negatives_flat = negatives.view(-1, *negatives.shape[-3:])
-        imgs_all = torch.cat([anchors_flat, positives_flat, negatives_flat], dim=0)
-        target_all = torch.cat([target_anchors, target_positives, target_negatives], dim=0).view(-1)
-
-        pred_all = self.net.pred(imgs_all)
-        feat_all = self.net.feat(imgs_all)
-
-        feat = {
-            'anchor': feat_all[:len(anchors_flat)].reshape(*anchors.shape[:2], -1),
-            'positive': feat_all[len(anchors_flat):len(anchors_flat) + len(positives_flat)].reshape(*positives.shape[:2], -1),
-            'negative': feat_all[len(anchors_flat) + len(positives_flat):].reshape(*negatives.shape[:2], -1),
-        }
-
-        return pred_all, target_all, feat
-
-    def eval(self, x, col, change_col=False):
-        return [self.net.pred(x)]
-
-    
 class ReverseLayerF(Function):
 
     @staticmethod
@@ -155,7 +124,7 @@ class MyModel_dann(nn.Module):
     def __init__(self):
         super(MyModel_dann, self).__init__()
 
-        self.feature = nn.Sequential(
+        self.feat = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=5),
             nn.BatchNorm2d(64),
             nn.MaxPool2d(2),
@@ -167,7 +136,7 @@ class MyModel_dann(nn.Module):
             nn.ReLU(True)
         )
 
-        self.class_classifier = nn.Sequential(
+        self.cls_classifier = nn.Sequential(
             nn.Linear(50 * 4 * 4, 100),
             nn.BatchNorm1d(100),
             nn.ReLU(True),
@@ -179,7 +148,7 @@ class MyModel_dann(nn.Module):
             nn.LogSoftmax(dim=1)
         )
 
-        self.domain_classifier = nn.Sequential(
+        self.dom_classifier = nn.Sequential(
             nn.Linear(50 * 4 * 4, 100),
             nn.BatchNorm1d(100),
             nn.ReLU(True),
@@ -189,14 +158,16 @@ class MyModel_dann(nn.Module):
 
     def forward(self, input_data, alpha):
         input_data = input_data.expand(input_data.data.shape[0], 3, 28, 28)
-        feature = self.feature(input_data)
-        feature = feature.view(-1, 50 * 4 * 4)
-        reverse_feature = ReverseLayerF.apply(feature, alpha)
-        output_cls = self.class_classifier(feature)
-        output_dom = self.domain_classifier(reverse_feature)
+        feat = self.feat(input_data)
+        feat = feat.view(-1, 50 * 4 * 4)
+        reverse_feat = ReverseLayerF.apply(feat, alpha)
+        output_cls = self.cls_classifier(feat)
+        output_dom = self.dom_classifier(reverse_feat)
 
         return output_cls, output_dom
 
+
+# The CNC model refers to https://github.com/WentDong/AI3610_Project/blob/main/model/CorrectNContrast.py
 class CorrectNContrast(nn.Module):
     def __init__(self,device='cuda'):
         super(CorrectNContrast, self).__init__()
@@ -209,7 +180,6 @@ class CorrectNContrast(nn.Module):
         negatives_flat = negatives.view(-1, *negatives.shape[-3:])
         imgs_all = torch.cat([anchors_flat, positives_flat, negatives_flat], dim=0)
         target_all = torch.cat([target_anchors, target_positives, target_negatives], dim=0).view(-1)
-        # import pdb; pdb.set_trace()
         pred_all = self.net.pred(imgs_all)
         feat_all = self.net.feat(imgs_all)
 

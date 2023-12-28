@@ -1,4 +1,4 @@
-from utils.model import MyModel, SNNModel
+from utils.model import MyModel, MySNNModel
 from utils.utils import set_all_seeds
 import torch 
 import torch.nn as nn
@@ -8,8 +8,8 @@ from torch.utils.data import DataLoader
 from utils.dataset import ColoredMNIST, RedMNIST, GreenMNIST
 
 
-model_red = SNNModel()
-model_green = SNNModel()
+model_red = MySNNModel()
+model_green = MySNNModel()
 
 set_all_seeds(0)
 

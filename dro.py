@@ -34,13 +34,16 @@ test_dataset = ColoredMNIST(name='test', balance=False)
 train_dataset_grouped = divide_dataset(train_dataset)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
-def train_dro(model, train_dataset_grouped,l2_lambd=.001, etaq=.001):
-    set_all_seeds(0)
+
+
+def train_dro(model, train_dataset_grouped,lambd=0.001, etaq=0.001):
+    set_all_seeds(7)
     model.to('cuda')
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     model.train()
     group_names = ['red0', 'red1', 'green0', 'green1']
-    q = np.repeat(1/4,4)
+    # 权重 q 初始化为 [0.25, 0.25, 0.25, 0.25]
+    q = np.repeat(1/4, 4)
     for epoch in tqdm(range(10000)):
         optimizer.zero_grad()
         idx = random.sample(range(4), 1)[0]
@@ -54,19 +57,17 @@ def train_dro(model, train_dataset_grouped,l2_lambd=.001, etaq=.001):
         
         output = model(image)
         
-        #L2 regularization loss
+        # update algorithm refers to https://github.com/Chenfeng-Li/DRO
         loss = F.binary_cross_entropy_with_logits(output, target)
-        l2_norm = sum(p.pow(2).sum() for p in model.parameters())
-        loss += l2_lambd * l2_norm
+        l2_norm = sum(param.pow(2).sum() for param in model.parameters())
+        loss += lambd * l2_norm
         
-        #Update q
         lossNP = loss.detach().cpu().numpy()
         q[idx] = q[idx] * np.exp(etaq*lossNP)
         q /= q.sum()
         
-        #Update theta
         for g in optimizer.param_groups:
-            g['lr'] = 0.001 * q[idx] #Change learning rate
+            g['lr'] = 0.001 * q[idx] 
         loss.backward()
         optimizer.step()
         

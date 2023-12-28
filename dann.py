@@ -62,6 +62,7 @@ img_target_transform = transforms.Compose([
 
 dataset_source_train = datasets.MNIST(root='../', train=True, transform=img_source_transform, target_transform=target_source_transform, download=False)
 dataset_source_test = datasets.MNIST(root='../', train=False, transform=img_source_transform, target_transform=target_source_transform, download=False)
+
 dataset_target_train = ColoredMNIST(transform=img_target_transform, env='train1')
 dataset_target_test = ColoredMNIST(transform=img_target_transform, env='test')
 
@@ -84,7 +85,8 @@ for epoch in range(num_epochs):
         
         p = float(idx + min_len * epoch) / (num_epochs * min_len)
         alpha = 2.0 / (1.0 + np.exp(-10 * p)) - 1
-
+        
+        # 全是源域数据/全是目标域数据
         domain_label_s = torch.zeros(len(target_s)).long()
         domain_label_t = torch.ones(len(target_t)).long()
 

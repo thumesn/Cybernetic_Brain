@@ -1,4 +1,4 @@
-from utils.model import MyModel, SNNModel
+from utils.model import MyModel, MySNNModel
 from utils.utils import set_all_seeds, detect_color, reverse_batch
 import torch 
 import torch.nn as nn
@@ -9,7 +9,7 @@ from utils.dataset import ColoredMNIST
 
 # 初始化模型
 set_all_seeds(0)
-model = SNNModel()
+model = MySNNModel()
 model.to('cuda')
 # 定义损失函数和优化器
 criterion = nn.CrossEntropyLoss()
