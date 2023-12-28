@@ -1,3 +1,4 @@
+import os
 from utils.model import MyModel, MySNNModel, MyModel_dro, MyModel_irm
 from utils.utils import set_all_seeds, detect_color
 import torch 
@@ -25,8 +26,11 @@ def train_test_MyModel_irm():
     train_loader_1 = DataLoader(train_dataset_1, batch_size=64, shuffle=True)
     train_loader_2 = DataLoader(train_dataset_2, batch_size=64, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
-    num_epochs = 50
+    num_epochs = 30
     best_acc = 0.0
+    
+    if not os.path.exists('./save/other_methods'):
+        os.makedirs('./save/other_methods')
 
     for epoch in range(num_epochs):
         model.train()  

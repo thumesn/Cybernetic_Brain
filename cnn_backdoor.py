@@ -1,3 +1,4 @@
+import os
 from utils.model import MyModel
 from utils.utils import set_all_seeds
 import torch 
@@ -26,9 +27,11 @@ test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 print(len(train_loader))
 print(len(test_loader))
 
-# import pdb; pdb.set_trace()
 
 best_acc = 0
+
+if not os.path.exists('./save/cnn'):
+    os.makedirs('./save/cnn')
 
 # 训练模型
 num_epochs = 10

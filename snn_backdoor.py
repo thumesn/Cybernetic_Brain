@@ -1,3 +1,4 @@
+import os
 from utils.model import MyModel, MySNNModel
 from utils.utils import set_all_seeds
 import torch 
@@ -26,6 +27,9 @@ print(len(train_loader))
 print(len(test_loader))
 
 best_acc = 0
+
+if not os.path.exists('./save/snn'):
+    os.makedirs('./save/snn')
 
 # 训练模型
 num_epochs = 10

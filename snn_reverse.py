@@ -1,3 +1,4 @@
+import os
 from utils.model import MyModel, MySNNModel
 from utils.utils import set_all_seeds, detect_color, reverse_batch
 import torch 
@@ -22,6 +23,9 @@ train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
 best_acc = 0
+
+if not os.path.exists('./save/snn'):
+    os.makedirs('./save/snn')
 
 # 训练模型
 num_epochs = 50

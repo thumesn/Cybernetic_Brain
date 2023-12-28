@@ -58,6 +58,9 @@ cncLoader = DataLoader(cncDataset, batch_size=16, shuffle=True)
 
 best_acc = 0
 
+if not os.path.exists('./save/other_methods'):
+    os.makedirs('./save/other_methods')
+
 num_epochs_cnc = 10
 for epoch in range(num_epochs_cnc):
     for idx, data in enumerate(cncLoader):

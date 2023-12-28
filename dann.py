@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
@@ -74,6 +75,9 @@ dataloader_target_test = DataLoader(dataset_target_test, batch_size=32, shuffle=
 min_len = min(len(dataloader_source_train), len(dataloader_target_train))
 
 best_acc = 0
+
+if not os.path.exists('./save/other_methods'):
+    os.makedirs('./save/other_methods')
 
 num_epochs = 10
 for epoch in range(num_epochs):

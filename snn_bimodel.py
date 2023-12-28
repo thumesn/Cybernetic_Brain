@@ -1,3 +1,4 @@
+import os
 from utils.model import MyModel, MySNNModel
 from utils.utils import set_all_seeds
 import torch 
@@ -33,6 +34,10 @@ ratio_green = len(train_loader_green) / (len(train_loader_red) + len(train_loade
 
 num_epochs = 50
 best_acc = 0
+
+if not os.path.exists('./save/snn'):
+    os.makedirs('./save/snn')
+
 for epoch in range(num_epochs):
     model_red.train()
     model_green.train()

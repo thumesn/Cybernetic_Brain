@@ -1,3 +1,4 @@
+import os
 from utils.model import MyModel, MySNNModel, MyModel_dro
 from utils.utils import set_all_seeds, detect_color
 import torch 
@@ -34,7 +35,8 @@ test_dataset = ColoredMNIST(name='test', balance=False)
 train_dataset_grouped = divide_dataset(train_dataset)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
-
+if not os.path.exists('./save/other_methods'):
+    os.makedirs('./save/other_methods')
 
 def train_dro(model, train_dataset_grouped,lambd=0.001, etaq=0.001):
     set_all_seeds(7)
