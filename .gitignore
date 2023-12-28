@@ -1,4 +1,4 @@
 # Ignore .pt and .pth files
-*.pt
+# *.pt
 *.pth
 save/
