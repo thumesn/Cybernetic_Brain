@@ -1,4 +1,4 @@
-from utils.model import MyModel, SNNModel, MyModel_dro, MyModel_irm
+from utils.model import MyModel, MySNNModel, MyModel_dro, MyModel_irm
 from utils.utils import set_all_seeds, detect_color
 import torch 
 import torch.nn as nn
