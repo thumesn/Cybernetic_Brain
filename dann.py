@@ -61,8 +61,8 @@ img_target_transform = transforms.Compose([
     transforms.Normalize((0.5,0.5,0.5), (0.5,0.5,0.5))
 ])
 
-dataset_source_train = datasets.MNIST(root='./', train=True, transform=img_source_transform, target_transform=target_source_transform, download=True)
-dataset_source_test = datasets.MNIST(root='./', train=False, transform=img_source_transform, target_transform=target_source_transform, download=True)
+dataset_source_train = datasets.MNIST(root='../', train=True, transform=img_source_transform, target_transform=target_source_transform, download=True)
+dataset_source_test = datasets.MNIST(root='../', train=False, transform=img_source_transform, target_transform=target_source_transform, download=True)
 
 dataset_target_train = ColoredMNIST(transform=img_target_transform, env='train1')
 dataset_target_test = ColoredMNIST(transform=img_target_transform, env='test')

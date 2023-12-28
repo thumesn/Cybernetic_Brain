@@ -18,6 +18,8 @@ python xxx_bimodel.py
 python xxx_backdoor.py 
 ```
 
+请注意，在运行mnn方法前，请先训练对应的cnn模型
+
 ## 提高部分
 
 运行提高部分的方法，xxx为方法名（dro，dann，irm，cnc）
